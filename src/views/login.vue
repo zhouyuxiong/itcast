@@ -1,16 +1,16 @@
 <template>
   <div class="login">
     <div class="container">
-      <img src="../assets/kbs.jpg" alt="" class="avatar">
+      <img src="../assets/kbs.jpg" alt class="avatar">
       <el-form :model="ruleForm" :rules="rules" ref="loginForm" class="demo-ruleForm">
         <el-form-item prop="username">
-          <el-input v-model="ruleForm.username" placeholder="输入账号"></el-input>
+          <el-input v-model="ruleForm.username" placeholder="输入账号" prefix-icon='myicon myicon-user'></el-input>
         </el-form-item>
         <el-form-item prop="password">
-          <el-input v-model="ruleForm.password" placeholder="输入密码"></el-input>
+          <el-input v-model="ruleForm.password" placeholder="输入密码" prefix-icon='myicon myicon-key'></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" class="login-btn">登录</el-button>
+          <el-button type="primary" class="login-btn" @click.prevent="login">登录</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -18,6 +18,7 @@
 </template>
 
 <script>
+import { userlogin } from '@/api/users.js'
 export default {
   data () {
     return {
@@ -32,6 +33,46 @@ export default {
         ],
         password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
       }
+    }
+  },
+  methods: {
+    login () {
+      this.$refs.loginForm.validate(valid => {
+        if (valid) {
+          userlogin(this.ruleForm)
+            .then(result => {
+              // console.log(result)
+              if (result.data.meta.status === 400) {
+                this.$message({
+                  showClose: true,
+                  message: result.data.meta.msg,
+                  type: 'error'
+                })
+              } else {
+                /* this.$message({
+                  message: '登录成功',
+                  type: 'success'
+                }) */
+                this.$router.push({ name: 'Home' })
+              }
+            })
+            .catch(() => {
+              this.$message({
+                showClose: true,
+                message: '登录失败',
+                type: 'error'
+              })
+            })
+          // console.log(1)
+        } else {
+          this.$message({
+            showClose: true,
+            message: '数据输入不合法',
+            type: 'error'
+          })
+          return false
+        }
+      })
     }
   }
 }
@@ -54,7 +95,7 @@ export default {
       width: 100%;
     }
 
-    .avatar{
+    .avatar {
       position: relative;
       top: -50%;
       left: 50%;
