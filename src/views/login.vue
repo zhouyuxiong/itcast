@@ -4,10 +4,10 @@
       <img src="../assets/kbs.jpg" alt class="avatar">
       <el-form :model="ruleForm" :rules="rules" ref="loginForm" class="demo-ruleForm">
         <el-form-item prop="username">
-          <el-input v-model="ruleForm.username" placeholder="输入账号" prefix-icon='myicon myicon-user'></el-input>
+          <el-input v-model="ruleForm.username" placeholder="输入账号" prefix-icon="myicon myicon-user"></el-input>
         </el-form-item>
         <el-form-item prop="password">
-          <el-input v-model="ruleForm.password" placeholder="输入密码" prefix-icon='myicon myicon-key'></el-input>
+          <el-input v-model="ruleForm.password" placeholder="输入密码" prefix-icon="myicon myicon-key"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" class="login-btn" @click.prevent="login">登录</el-button>
@@ -53,6 +53,9 @@ export default {
                   message: '登录成功',
                   type: 'success'
                 }) */
+                // console.log(result)
+                // 保存数据
+                localStorage.setItem('itcast_token', result.data.data.token)
                 this.$router.push({ name: 'Home' })
               }
             })
