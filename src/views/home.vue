@@ -4,6 +4,8 @@
       <el-aside width="200px">
         <div class="logo"></div>
         <el-menu
+          :router="true"
+          :unique-opened="true"
           default-active="2"
           class="el-menu-vertical-demo"
           background-color="#545c64"
@@ -13,36 +15,24 @@
           <el-submenu index="1">
             <template slot="title">
               <i class="el-icon-location"></i>
-              <span>导航一</span>
+              <span>用户管理</span>
             </template>
-            <el-menu-item index="1-1">
+            <el-menu-item index="/home/user">
               <template slot="title">
                 <i class="el-icon-location"></i>
-                <span>导航一</span>
-              </template>
-            </el-menu-item>
-            <el-menu-item index="1-2">
-              <template slot="title">
-                <i class="el-icon-location"></i>
-                <span>导航一</span>
+                <span>用户列表</span>
               </template>
             </el-menu-item>
           </el-submenu>
           <el-submenu index="2">
             <template slot="title">
               <i class="el-icon-location"></i>
-              <span>导航一</span>
+              <span>权限管理</span>
             </template>
             <el-menu-item index="2-1">
               <template slot="title">
                 <i class="el-icon-location"></i>
-                <span>导航一</span>
-              </template>
-            </el-menu-item>
-            <el-menu-item index="2-2">
-              <template slot="title">
-                <i class="el-icon-location"></i>
-                <span>导航一</span>
+                <span>角色列表</span>
               </template>
             </el-menu-item>
           </el-submenu>
