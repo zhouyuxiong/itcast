@@ -57,7 +57,9 @@
             <a href="javascript:;">退出</a>
           </div>
         </el-header>
-        <el-main>Main</el-main>
+        <el-main>
+          <router-view></router-view>
+        </el-main>
       </el-container>
     </el-container>
   </div>
