@@ -15,6 +15,7 @@ axios.interceptors.request.use(function (config) {
   return Promise.reject(error)
 })
 
+// 登录
 export const userlogin = (data) => {
   return axios({
     url: '/login',
@@ -23,9 +24,19 @@ export const userlogin = (data) => {
   })
 }
 
+// 获取用户列表数据
 export const getAllList = (params) => {
   return axios({
     url: 'users',
     params
+  })
+}
+
+// 添加用户
+export const addUser = (data) => {
+  return axios({
+    url: 'users',
+    method: 'post',
+    data
   })
 }

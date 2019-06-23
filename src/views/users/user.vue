@@ -16,7 +16,7 @@
       >
         <el-button slot="append" icon="el-icon-search"></el-button>
       </el-input>
-      <el-button type="success" plain>添加用户</el-button>
+      <el-button type="success" plain @click="addDialogFormVisible=true">添加用户</el-button>
     </div>
     <!-- 表格 -->
     <el-table :data="userList" border style="width: 100%;margin-top:15px">
@@ -53,11 +53,33 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="total-0"
     ></el-pagination>
+
+    <!-- 添加用户 -->
+    <el-dialog title="添加用户" :visible.sync="addDialogFormVisible" :show-close="false">
+      <el-form :model="addForm" :label-width="'120px'" :rules="rules" ref="addForm">
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="addForm.username" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="addForm.password" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="addForm.email" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" prop="mobile">
+          <el-input v-model="addForm.mobile" auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addCancel">取 消</el-button>
+        <el-button type="primary" @click="add">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getAllList } from '@/api/users.js'
+import { getAllList, addUser } from '@/api/users.js'
 
 export default {
   data () {
@@ -68,10 +90,43 @@ export default {
       pagesize: 2,
       total: '',
       value2: true,
-      userList: []
+      userList: [],
+      addDialogFormVisible: false,
+      addForm: {
+        username: '',
+        password: '',
+        email: '',
+        mobile: ''
+      },
+      rules: {
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 6, max: 10, message: '长度在 6 到 10 个字符', trigger: 'blur' }
+        ],
+        email: [
+          { required: true, message: '请输入邮箱', trigger: 'blur' },
+          {
+            pattern: /\w+[@]+\w+[.]\w/,
+            message: '请输入正确邮箱',
+            trigger: 'blur'
+          }
+        ],
+        mobile: [
+          { required: true, message: '请输入手机号码', trigger: 'blur' },
+          {
+            pattern: /^1[3-9]\d{9}$/,
+            message: '请输入正确手机号码',
+            trigger: 'blur'
+          }
+        ]
+      }
     }
   },
   methods: {
+    // 渲染数据
     init () {
       getAllList({
         query: this.query,
@@ -87,18 +142,54 @@ export default {
           console.log(err)
         })
     },
+
     handleEdit (index, obj) {
       console.log(index, obj)
     },
+    // 每页条数
     handleSizeChange (val) {
       // console.log(`每页 ${val} 条`)
       this.pagesize = val
       this.init()
     },
+    // 页码
     handleCurrentChange (val) {
       // console.log(`当前页: ${val}`)
       this.pagenum = val
       this.init()
+    },
+    // 添加用户
+    add () {
+      this.$refs.addForm.validate(valid => {
+        if (valid) {
+          addUser(this.addForm)
+            .then(success => {
+              // console.log(success)
+              if (success.data.meta.status === 201) {
+                this.$message({
+                  type: 'success',
+                  message: success.data.meta.msg
+                })
+                this.addDialogFormVisible = false
+                this.init()
+                this.$refs.addForm.resetFields()
+              }
+            })
+            .catch(() => {
+              this.$message({
+                type: 'error',
+                message: '错误'
+              })
+            })
+        } else {
+          return false
+        }
+      })
+    },
+    // 取消添加
+    addCancel () {
+      this.addDialogFormVisible = false
+      this.$refs.addForm.resetFields()
     }
   },
   mounted () {
