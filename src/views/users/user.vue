@@ -26,7 +26,12 @@
       <el-table-column prop="mobile" label="电话"></el-table-column>
       <el-table-column label="状态">
         <template slot-scope="scope">
-          <el-switch v-model="value2" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+          <el-switch
+            v-model="scope.row.mg_state"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            @change="handlezt(scope.row.id,scope.row.mg_state)"
+          ></el-switch>
         </template>
       </el-table-column>
       <el-table-column label="操作">
@@ -98,7 +103,13 @@
 </template>
 
 <script>
-import { getAllList, addUser, editUser, delUser } from '@/api/users.js';
+import {
+  getAllList,
+  addUser,
+  editUser,
+  delUser,
+  updateUserStatus
+} from '@/api/users.js'
 
 export default {
   data () {
@@ -108,7 +119,6 @@ export default {
       pagenum: 1,
       pagesize: 2,
       total: '',
-      value2: true,
       userList: [],
       addDialogFormVisible: false,
       editDialogFormVisible: false,
@@ -278,6 +288,32 @@ export default {
           this.$message({
             type: 'info',
             message: '已取消删除'
+          })
+        })
+    },
+    // 更改用户状态
+    handlezt (id, type) {
+      // console.log(id, type)
+      updateUserStatus(id, type)
+        .then(success => {
+          // console.log(success)
+          if (success.data.meta.status === 200) {
+            this.$message({
+              type: 'success',
+              message: success.data.meta.msg
+            })
+            this.init()
+          } else {
+            this.$message({
+              type: 'error',
+              message: success.data.meta.msg
+            })
+          }
+        })
+        .catch(() => {
+          this.$message({
+            type: 'error',
+            message: '修改出错'
           })
         })
     }

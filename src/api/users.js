@@ -57,3 +57,11 @@ export const delUser = (id) => {
     method: 'delete'
   })
 }
+
+// 修改用户状态
+export const updateUserStatus = (id, type) => {
+  return axios({
+    url: `users/${id}/state/${type}`,
+    method: 'put'
+  })
+}
