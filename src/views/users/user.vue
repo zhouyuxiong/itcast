@@ -32,7 +32,7 @@
       <el-table-column label="操作">
         <template slot-scope="scope">
           <el-tooltip class="item" effect="dark" content="编辑" placement="top">
-            <el-button type="info" icon="el-icon-edit" @click="handleEdit(scope.$index, scope.row)"></el-button>
+            <el-button type="info" icon="el-icon-edit" @click="handleEdit(scope.row)"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="分配" placement="top">
             <el-button type="success" icon="el-icon-share"></el-button>
@@ -75,11 +75,30 @@
         <el-button type="primary" @click="add">确 定</el-button>
       </div>
     </el-dialog>
+
+    <!-- 编辑用户 -->
+    <el-dialog title="编辑用户" :visible.sync="editDialogFormVisible">
+      <el-form :model="editForm" :label-width="'120px'" :rules="rules" ref="editForm">
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="editForm.username" auto-complete="off" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="editForm.email" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" prop="mobile">
+          <el-input v-model="editForm.mobile" auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="editDialogFormVisible=false">取 消</el-button>
+        <el-button type="primary" @click="edit">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getAllList, addUser } from '@/api/users.js'
+import { getAllList, addUser, editUser } from '@/api/users.js'
 
 export default {
   data () {
@@ -92,9 +111,16 @@ export default {
       value2: true,
       userList: [],
       addDialogFormVisible: false,
+      editDialogFormVisible: false,
       addForm: {
         username: '',
         password: '',
+        email: '',
+        mobile: ''
+      },
+      editForm: {
+        id: '',
+        username: '',
         email: '',
         mobile: ''
       },
@@ -142,9 +168,11 @@ export default {
           console.log(err)
         })
     },
-
-    handleEdit (index, obj) {
-      console.log(index, obj)
+    // 编辑页面显示并渲染数据
+    handleEdit (obj) {
+      this.editDialogFormVisible = true
+      // console.log(obj)
+      this.editForm = obj
     },
     // 每页条数
     handleSizeChange (val) {
@@ -190,6 +218,36 @@ export default {
     addCancel () {
       this.addDialogFormVisible = false
       this.$refs.addForm.resetFields()
+    },
+    // 编辑用户
+    edit () {
+      this.$refs.editForm.validate(valid => {
+        if (valid) {
+          editUser(this.editForm)
+            .then(success => {
+              // console.log(success)
+              if (success.data.meta.status === 200) {
+                this.$message({
+                  type: 'success',
+                  message: success.data.meta.msg
+                })
+                this.editDialogFormVisible = false
+                this.init()
+              }
+            })
+            .catch(() => {
+              this.$message({
+                type: 'error',
+                message: '更新失败'
+              })
+            })
+        } else {
+          this.$message({
+            type: 'error',
+            message: '出错'
+          })
+        }
+      })
     }
   },
   mounted () {
