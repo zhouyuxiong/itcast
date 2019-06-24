@@ -13,8 +13,9 @@
         v-model="userKey"
         class="input-with-select"
         style="width:300px;margin-right:15px"
+        @keyup.enter.native="init"
       >
-        <el-button slot="append" icon="el-icon-search"></el-button>
+        <el-button slot="append" icon="el-icon-search" @click="init"></el-button>
       </el-input>
       <el-button type="success" plain @click="addDialogFormVisible=true">添加用户</el-button>
     </div>
@@ -40,7 +41,7 @@
             <el-button type="info" icon="el-icon-edit" @click="handleEdit(scope.row)"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="分配" placement="top">
-            <el-button type="success" icon="el-icon-share"></el-button>
+            <el-button type="success" icon="el-icon-share" @click="handleGrant(scope.row)"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="删除" placement="top">
             <el-button type="warning" icon="el-icon-delete" @click="del(scope.row.id)"></el-button>
@@ -99,6 +100,29 @@
         <el-button type="primary" @click="edit">确 定</el-button>
       </div>
     </el-dialog>
+
+    <!-- 分配角色 -->
+    <el-dialog title="分配角色" :visible.sync="grantDialogFormVisible">
+      <el-form :model="grantForm" :label-width="'120px'">
+        <el-form-item label="用户名">
+          <el-input v-model="grantForm.username" auto-complete="off" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="角色列表">
+          <el-select v-model="grantForm.rid" placeholder="请选择">
+            <el-option
+              v-for="item in rolesList"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="grantDialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="grantrolesubmit">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -108,9 +132,10 @@ import {
   addUser,
   editUser,
   delUser,
-  updateUserStatus
+  updateUserStatus,
+  grantRoles
 } from '@/api/users.js'
-
+import { getAllRoles } from '@/api/roles.js'
 export default {
   data () {
     return {
@@ -122,6 +147,7 @@ export default {
       userList: [],
       addDialogFormVisible: false,
       editDialogFormVisible: false,
+      grantDialogFormVisible: false,
       addForm: {
         username: '',
         password: '',
@@ -134,6 +160,8 @@ export default {
         email: '',
         mobile: ''
       },
+      grantForm: {},
+      rolesList: [],
       rules: {
         username: [
           { required: true, message: '请输入用户名', trigger: 'blur' }
@@ -165,7 +193,7 @@ export default {
     // 渲染数据
     init () {
       getAllList({
-        query: this.query,
+        query: this.userKey,
         pagenum: this.pagenum,
         pagesize: this.pagesize
       })
@@ -252,10 +280,11 @@ export default {
               })
             })
         } else {
-          this.$message({
+          /* this.$message({
             type: 'error',
             message: '出错'
-          })
+          }) */
+          return false
         }
       })
     },
@@ -308,6 +337,7 @@ export default {
               type: 'error',
               message: success.data.meta.msg
             })
+            return false
           }
         })
         .catch(() => {
@@ -316,10 +346,49 @@ export default {
             message: '修改出错'
           })
         })
+    },
+    // 显示分配角色框
+    handleGrant (obj) {
+      this.grantDialogFormVisible = true
+      // console.log(obj)
+      this.grantForm = obj
+    },
+    // 更改角色
+    grantrolesubmit () {
+      grantRoles(this.grantForm.id, this.grantForm.rid)
+        .then(success => {
+          // console.log(success)
+          if (success.data.meta.status === 200) {
+            this.$message({
+              type: 'success',
+              message: success.data.meta.msg
+            })
+            this.grantDialogFormVisible = false
+          } else {
+            this.$message({
+              type: 'error',
+              message: success.data.meta.msg
+            })
+          }
+        })
+        .catch(err => {
+          console.log(err)
+          return false
+        })
     }
   },
   mounted () {
     this.init()
+    // 获取全部角色
+    getAllRoles()
+      .then(success => {
+        // console.log(success)
+        this.rolesList = success.data.data
+      })
+      .catch(err => {
+        console.log(err)
+        return false
+      })
   }
 }
 </script>
