@@ -12,20 +12,39 @@
     <el-table :data="rolesList" style="width: 100%">
       <el-table-column type="expand">
         <template slot-scope="props">
-          <el-row v-for="one in props.row.children" :key="one.id" style="margin-bottom:15px">
+          <el-row
+            v-for="one in props.row.children"
+            :key="one.id"
+            style="margin-bottom:15px;border-bottom:1px dashed #ccc"
+          >
             <el-col :span="4">
-              <el-tag closable type="primary">{{one.authName}}</el-tag>
+              <el-tag closable type="primary" @close="delRight(props.row,one.id)">{{one.authName}}</el-tag>
             </el-col>
             <el-col :span="20">
-              <el-row v-for="two in one.children" :key='two.id' style="margin-bottom:15px">
+              <el-row v-for="two in one.children" :key="two.id" style="margin-bottom:15px">
                 <el-col :span="4">
-                  <el-tag closable type="success">{{two.authName}}</el-tag>
+                  <el-tag
+                    closable
+                    type="success"
+                    @close="delRight(props.row,two.id)"
+                    v-if="two.children.length!==0"
+                  >{{two.authName}}</el-tag>
                 </el-col>
                 <el-col :span="20">
-                  <el-tag closable type="info" v-for="three in two.children" :key='three.id' style='margin:0 5px 15px 0'>{{three.authName}}</el-tag>
+                  <el-tag
+                    closable
+                    type="info"
+                    v-for="three in two.children"
+                    :key="three.id"
+                    style="margin:0 5px 15px 0"
+                    @close="delRight(props.row,three.id)"
+                  >{{three.authName}}</el-tag>
                 </el-col>
               </el-row>
             </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24" v-if="props.row.children.length===0">无数据</el-col>
           </el-row>
         </template>
       </el-table-column>
@@ -50,14 +69,16 @@
 </template>
 
 <script>
-import { getAllRoles } from '@/api/roles.js'
+import { getAllRoles, delRights } from '@/api/roles.js'
 export default {
   data () {
     return {
-      rolesList: []
+      rolesList: [],
+      roleId: ''
     }
   },
   mounted () {
+    // 渲染角色
     getAllRoles()
       .then(success => {
         // console.log(success)
@@ -66,6 +87,32 @@ export default {
       .catch(err => {
         console.log(err)
       })
+  },
+  methods: {
+    // 删除下拉角色权限
+    delRight (row, rightId) {
+      // console.log(row, rightId)
+      delRights(row.id, rightId)
+        .then(success => {
+          // console.log(success)
+          if (success.data.meta.status === 200) {
+            this.$message({
+              type: 'success',
+              message: success.data.meta.msg
+            })
+            row.children = success.data.data
+          } else {
+            this.$message({
+              type: 'error',
+              message: success.data.meta.msg
+            })
+          }
+        })
+        .catch(err => {
+          console.log(err)
+          return false
+        })
+    }
   }
 }
 </script>
