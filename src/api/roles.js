@@ -30,3 +30,12 @@ export const delRights = (roleid, rightid) => {
     method: 'delete'
   })
 }
+
+// 角色授权
+export const grantRights = (roleid, rids) => {
+  return axios({
+    url: `roles/${roleid}/rights`,
+    method: 'post',
+    data: { rids }
+  })
+}
