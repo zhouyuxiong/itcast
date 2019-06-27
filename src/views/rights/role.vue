@@ -7,7 +7,7 @@
       <el-breadcrumb-item>角色列表</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 按钮 -->
-    <el-button type="success" plain>添加角色</el-button>
+    <el-button type="success" plain @click="addDialogFormVisible=true">添加角色</el-button>
     <!-- 表格 -->
     <el-table :data="rolesList" style="width: 100%">
       <el-table-column type="expand">
@@ -83,11 +83,27 @@
         <el-button type="primary" @click="grantSubmit">确 定</el-button>
       </div>
     </el-dialog>
+
+    <!-- 添加角色 -->
+    <el-dialog title="添加角色" :visible.sync="addDialogFormVisible" :close-on-click-modal="false">
+      <el-form :model="addForm" :label-width="'120px'" :rules="rules">
+        <el-form-item label="角色名称" prop="roleName">
+          <el-input v-model="addForm.roleName" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述" prop="roleDesc">
+          <el-input v-model="addForm.roleDesc" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addDialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addRole">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getAllRoles, delRights, grantRights } from '@/api/roles.js';
+import { getAllRoles, delRights, grantRights, addRoles } from '@/api/roles.js';
 import { getAllRightList } from '@/api/rights.js';
 export default {
   data () {
@@ -100,21 +116,35 @@ export default {
       defaultProps: {
         children: 'children',
         label: 'authName'
+      },
+      addDialogFormVisible: false,
+      addForm: {},
+      rules: {
+        roleName: [
+          { required: true, message: '请输入角色名称', trigger: 'blur' }
+        ],
+        roleDesc: [
+          { required: true, message: '请输入角色描述', trigger: 'blur' }
+        ]
       }
     }
   },
   mounted () {
     // 渲染角色
-    getAllRoles()
-      .then(success => {
-        // console.log(success)
-        this.rolesList = success.data.data
-      })
-      .catch(err => {
-        console.log(err)
-      })
+    this.init()
   },
   methods: {
+    // 获取数据
+    init () {
+      getAllRoles()
+        .then(success => {
+          // console.log(success)
+          this.rolesList = success.data.data
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
     // 删除下拉角色权限
     delRight (row, rightId) {
       // console.log(row, rightId)
@@ -194,6 +224,30 @@ export default {
               message: success.data.meta.msg
             })
           }
+        })
+        .catch(err => {
+          console.log(err)
+          return false
+        })
+    },
+    // 添加角色
+    addRole () {
+      addRoles(this.addForm)
+        .then(success => {
+          // console.log(success)
+          if (success.data.meta.status === 201) {
+            this.$message({
+              type: 'success',
+              message: success.data.meta.msg
+            })
+          } else {
+            this.$message({
+              type: 'error',
+              message: success.data.meta.msg
+            })
+          }
+          this.addDialogFormVisible = false
+          this.init()
         })
         .catch(err => {
           console.log(err)

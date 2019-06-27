@@ -39,3 +39,12 @@ export const grantRights = (roleid, rids) => {
     data: { rids }
   })
 }
+
+// 添加角色
+export const addRoles = (data) => {
+  return axios({
+    url: 'roles',
+    method: 'post',
+    data
+  })
+}
